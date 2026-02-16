@@ -1,5 +1,8 @@
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.Json;
 
@@ -17,7 +20,7 @@ internal static class OcrRunner
         bitmap.Save(imagePath, System.Drawing.Imaging.ImageFormat.Png);
 
         // Run python OCR script and parse JSON output
-        var args = new[] { scriptPath, "--image", imagePath, "--json" };
+        List<string> args = new() { scriptPath, "--image", imagePath, "--json" };
         var (exitCode, stdout, stderr) = await RunProcessAsync("python", args);
         if (exitCode != 0)
         {
@@ -60,7 +63,7 @@ internal static class OcrRunner
         throw new FileNotFoundException($"Could not locate OCR script: {Path.Combine(parts)}. Run the app from within the repo folder.");
     }
 
-    private static async Task<(int exitCode, string stdout, string stderr)> RunProcessAsync(string fileName, IReadOnlyList<string> args)
+    private static async Task<(int exitCode, string stdout, string stderr)> RunProcessAsync(string fileName, IEnumerable<string> args)
     {
         var psi = new ProcessStartInfo
         {
