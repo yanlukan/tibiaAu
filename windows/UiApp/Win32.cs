@@ -56,7 +56,7 @@ internal static class Win32
 
     internal static Rectangle GetClientRectOnScreen(IntPtr hWnd)
     {
-        if (!GetClientRect(hWnd, out var clientRect))
+        if (!GetClientRectNative(hWnd, out var clientRect))
             return Rectangle.Empty;
 
         var topLeft = new POINT { X = clientRect.Left, Y = clientRect.Top };
