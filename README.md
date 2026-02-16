@@ -119,3 +119,6 @@ Prereqs for OCR button:
 
 Capture note:
 - The UI capture prefers `PrintWindow`, which can keep working even if the game window is covered (best-effort; some rendering paths may still return black).
+
+Crash note:
+- If the UI app crashes, it writes a log to `%TEMP%\\tibiaAu\\uiapp_crash.log`.
