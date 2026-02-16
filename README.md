@@ -94,7 +94,7 @@ python .\python\ocr\ocr.py --image .\frames\latest.png --roi 10,10,300,80 --debu
 This is a minimal WPF desktop app that:
 - Captures the game window (by title substring)
 - Shows a live preview
-- Runs OCR using Windows built-in OCR (`Windows.Media.Ocr`)
+- Runs OCR by invoking the included Python script (`python/ocr/ocr.py`)
 
 ### Build + run
 From `windows/`:
@@ -111,4 +111,7 @@ dotnet run --project .\UiApp\UiApp.csproj
 - Click **Start** to capture repeatedly, **Capture once** for a single frame
 - Click **OCR** to run OCR on the latest captured frame and show output
 
-If OCR says the engine is unavailable, install an OCR language pack in Windows Settings (e.g. English).
+Prereqs for OCR button:
+- Python installed and available as `python`
+- Tesseract installed
+- Python deps installed (`pip install -r .\python\ocr\requirements.txt`)
