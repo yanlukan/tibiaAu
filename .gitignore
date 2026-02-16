@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+# .NET
+bin/
+obj/
+*.user
+*.suo
+*.cache
+
+# Output frames
+frames/
+output/
