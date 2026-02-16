@@ -1,6 +1,7 @@
 using System.Drawing;
 using System.Globalization;
 using System.IO;
+using System.Windows.Interop;
 using System.Windows;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
@@ -11,6 +12,12 @@ public partial class MainWindow : Window
 {
     private readonly DispatcherTimer _timer;
     private Bitmap? _lastBitmap;
+    private IntPtr _attachedHwnd;
+
+    private const int HotkeyIdAttach = 1;
+    private const int WM_HOTKEY = 0x0312;
+    private const int VK_F5 = 0x74;
+    private HwndSource? _hwndSource;
 
     public MainWindow()
     {
@@ -18,6 +25,73 @@ public partial class MainWindow : Window
         _timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
         _timer.Tick += (_, _) => CaptureAndPreview();
         StatusText.Text = "Idle.";
+
+        Loaded += (_, _) => RegisterHotkeys();
+        Closed += (_, _) => UnregisterHotkeys();
+    }
+
+    private void RegisterHotkeys()
+    {
+        var hwnd = new WindowInteropHelper(this).Handle;
+        _hwndSource = HwndSource.FromHwnd(hwnd);
+        _hwndSource.AddHook(WndProc);
+
+        // Global F5: attach to the currently focused (foreground) window.
+        if (!Win32.RegisterHotKey(hwnd, HotkeyIdAttach, 0 /* no modifiers */, VK_F5))
+        {
+            StatusText.Text = "Could not register global F5 hotkey.";
+        }
+        else
+        {
+            StatusText.Text = "Tip: focus the game and press F5 to attach.";
+        }
+    }
+
+    private void UnregisterHotkeys()
+    {
+        try
+        {
+            var hwnd = new WindowInteropHelper(this).Handle;
+            Win32.UnregisterHotKey(hwnd, HotkeyIdAttach);
+        }
+        catch
+        {
+            // best-effort
+        }
+
+        if (_hwndSource is not null)
+        {
+            _hwndSource.RemoveHook(WndProc);
+            _hwndSource = null;
+        }
+    }
+
+    private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+    {
+        if (msg == WM_HOTKEY && wParam.ToInt32() == HotkeyIdAttach)
+        {
+            handled = true;
+            AttachToForegroundWindow();
+        }
+
+        return IntPtr.Zero;
+    }
+
+    private void AttachToForegroundWindow()
+    {
+        var fg = Win32.GetForegroundWindow();
+        if (fg == IntPtr.Zero)
+        {
+            StatusText.Text = "No foreground window.";
+            return;
+        }
+
+        _attachedHwnd = fg;
+        var title = Win32.GetWindowTitle(fg);
+        if (!string.IsNullOrWhiteSpace(title))
+            WindowTitleText.Text = title;
+
+        StatusText.Text = $"Attached to: {title}";
     }
 
     private void StartStop_Click(object sender, RoutedEventArgs e)
@@ -74,28 +148,30 @@ public partial class MainWindow : Window
     {
         try
         {
-            var title = WindowTitleText.Text?.Trim();
-            if (string.IsNullOrWhiteSpace(title))
-            {
-                StatusText.Text = "Enter a window title substring.";
-                return;
-            }
-
-            var hwnd = Win32.FindWindowByTitleSubstring(title);
+            var hwnd = _attachedHwnd;
             if (hwnd == IntPtr.Zero)
             {
-                StatusText.Text = "Window not found.";
-                return;
+                var title = WindowTitleText.Text?.Trim();
+                if (string.IsNullOrWhiteSpace(title))
+                {
+                    StatusText.Text = "Enter a window title substring (or press F5 while game is focused).";
+                    return;
+                }
+
+                hwnd = Win32.FindWindowByTitleSubstring(title);
+                if (hwnd == IntPtr.Zero)
+                {
+                    StatusText.Text = "Window not found.";
+                    return;
+                }
             }
 
-            var client = Win32.GetClientRectOnScreen(hwnd);
-            if (client.Width <= 0 || client.Height <= 0)
+            var rect = Win32.GetClientRect(hwnd);
+            if (rect.Width <= 0 || rect.Height <= 0)
             {
                 StatusText.Text = "Client rect invalid.";
                 return;
             }
-
-            var rect = client;
             var regionText = RegionText.Text?.Trim();
             if (!string.IsNullOrWhiteSpace(regionText))
             {
@@ -105,11 +181,11 @@ public partial class MainWindow : Window
                     return;
                 }
 
-                rect = new Rectangle(client.X + r.X, client.Y + r.Y, r.Width, r.Height);
+                rect = new Rectangle(r.X, r.Y, r.Width, r.Height);
             }
 
             _lastBitmap?.Dispose();
-            _lastBitmap = CaptureHelper.CaptureRect(rect);
+            _lastBitmap = CaptureHelper.CaptureClient(hwnd, rect);
 
             PreviewImage.Source = ToBitmapSource(_lastBitmap);
             StatusText.Text = $"Captured {rect.Width}x{rect.Height} @ {DateTime.Now:T}";

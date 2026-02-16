@@ -106,7 +106,8 @@ dotnet run --project .\UiApp\UiApp.csproj
 ```
 
 ### Using the UI
-- Set **Window title contains** to `miracle 7.4`
+- Set **Window title contains** to `miracle 7.4` (or any substring)
+- Tip: focus the game window and press **F5** to attach to the foreground window automatically
 - (Optional) set **Region x,y,w,h** to focus on a UI text area
 - Click **Start** to capture repeatedly, **Capture once** for a single frame
 - Click **OCR** to run OCR on the latest captured frame and show output
@@ -115,3 +116,6 @@ Prereqs for OCR button:
 - Python installed and available as `python`
 - Tesseract installed
 - Python deps installed (`pip install -r .\python\ocr\requirements.txt`)
+
+Capture note:
+- The UI capture prefers `PrintWindow`, which can keep working even if the game window is covered (best-effort; some rendering paths may still return black).
