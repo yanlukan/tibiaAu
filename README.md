@@ -88,3 +88,27 @@ python .\python\ocr\ocr.py --image .\frames\latest.png --roi 10,10,300,80 --debu
 ## Notes
 - The C# capture uses screen-based capture (`CopyFromScreen`), so the window must be visible on the Windows desktop.
 - For best results, run your game in **windowed or borderless-windowed** mode for capture.
+
+## 3) UI app (Windows)
+
+This is a minimal WPF desktop app that:
+- Captures the game window (by title substring)
+- Shows a live preview
+- Runs OCR using Windows built-in OCR (`Windows.Media.Ocr`)
+
+### Build + run
+From `windows/`:
+
+```powershell
+cd windows
+dotnet build .\tibiaAu.sln
+dotnet run --project .\UiApp\UiApp.csproj
+```
+
+### Using the UI
+- Set **Window title contains** to `miracle 7.4`
+- (Optional) set **Region x,y,w,h** to focus on a UI text area
+- Click **Start** to capture repeatedly, **Capture once** for a single frame
+- Click **OCR** to run OCR on the latest captured frame and show output
+
+If OCR says the engine is unavailable, install an OCR language pack in Windows Settings (e.g. English).

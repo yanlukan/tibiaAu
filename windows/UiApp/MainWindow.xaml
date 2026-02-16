@@ -1,0 +1,49 @@
+<Window x:Class="UiApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="tibiaAu UI" Height="720" Width="1100">
+    <Grid Margin="12">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*" />
+            <ColumnDefinition Width="3*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" VerticalAlignment="Top">
+            <TextBlock Text="Window title contains:" VerticalAlignment="Center" />
+            <TextBox x:Name="WindowTitleText" Width="220" Margin="8,0,16,0" Text="miracle 7.4" />
+
+            <TextBlock Text="FPS:" VerticalAlignment="Center" />
+            <TextBox x:Name="FpsText" Width="50" Margin="8,0,16,0" Text="2" />
+
+            <TextBlock Text="Region x,y,w,h (optional):" VerticalAlignment="Center" />
+            <TextBox x:Name="RegionText" Width="200" Margin="8,0,16,0" />
+
+            <Button x:Name="StartStopButton" Width="120" Margin="0,0,8,0" Click="StartStop_Click">Start</Button>
+            <Button x:Name="CaptureOnceButton" Width="120" Margin="0,0,8,0" Click="CaptureOnce_Click">Capture once</Button>
+            <Button x:Name="OcrButton" Width="120" Click="Ocr_Click">OCR</Button>
+        </StackPanel>
+
+        <Border Grid.Row="1" Grid.Column="0" Margin="0,12,12,0" BorderBrush="#FFCCCCCC" BorderThickness="1">
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                <Image x:Name="PreviewImage" Stretch="None" />
+            </ScrollViewer>
+        </Border>
+
+        <Grid Grid.Row="1" Grid.Column="1" Margin="0,12,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <TextBlock Text="OCR output" FontWeight="Bold" />
+            <TextBox Grid.Row="1" x:Name="OcrOutput" IsReadOnly="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" />
+
+            <TextBlock Grid.Row="2" x:Name="StatusText" Margin="0,8,0,0" Foreground="#FF555555" />
+        </Grid>
+    </Grid>
+</Window>
